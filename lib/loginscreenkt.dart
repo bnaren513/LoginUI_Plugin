@@ -4,54 +4,57 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 class Loginscreenkt extends StatefulWidget {
-  Loginscreenkt({
-    Key key,
-    this.backgroundColor,
-    this.cardColor,
-    this.background,
-    @required this.authenticator,
-    this.loginValidator,
-    this.passwordValidator,
-    this.duration,
-    this.buttonContent,
-    this.buttonColor,
-    this.buttonTextColor,
-    @required this.nextRoute,
-    this.loginLabelText,
-    this.loginHintText,
-    this.passwordLabelText,
-    this.passwordHintText,
-    this.authenticationErrorMessage = "authentication failed.",
-    this.passwordErrorMessage = "password failed.",
-    this.loginErrorMessage = "login failed.",
-    this.asset,
-    this.rememberOption = false,
-    this.onRemember,
-    this.rememberText,
-    this.createAccount = false,
-    this.accountRoute,
-    this.passwordVisibilityToggable = true,
-    this.loginKeyboard = TextInputType.emailAddress,
-    this.passwordKeyboard = TextInputType.visiblePassword,
-    this.showLoginErrorMessage,
-    this.showPasswordErrorMessage,
-    //this.loginbuttonAction,
-  })  : assert(authenticator != null),
+  Loginscreenkt(
+      {Key key,
+      this.backgroundColor,
+      this.cardColor,
+      this.background,
+      @required this.authenticator,
+      this.loginValidator,
+      this.passwordValidator,
+      this.duration,
+      this.buttonContent,
+      this.buttonColor,
+      this.buttonTextColor,
+      this.nextRoute,
+      this.loginLabelText,
+      this.loginHintText,
+      this.passwordLabelText,
+      this.passwordHintText,
+      this.authenticationErrorMessage = "authentication failed.",
+      this.passwordErrorMessage = "password failed.",
+      this.loginErrorMessage = "login failed.",
+      this.asset,
+      this.rememberOption = false,
+      this.onRemember,
+      this.rememberText,
+      this.createAccount = false,
+      this.accountRoute,
+      this.passwordVisibilityToggable = true,
+      this.loginKeyboard = TextInputType.emailAddress,
+      this.passwordKeyboard = TextInputType.visiblePassword,
+      //this.showLoginErrorMessage,
+      //this.showPasswordErrorMessage,
+      this.showErrortext
+      //this.loginbuttonAction,
+      })
+      : assert(authenticator != null),
         assert(nextRoute != null && nextRoute.isNotEmpty),
         assert(!createAccount ||
             (createAccount && accountRoute != null && accountRoute.isNotEmpty)),
         assert(!rememberOption || (rememberOption && onRemember != null)),
         super(key: key);
 
-       // Function loginbuttonAction;
+  // Function loginbuttonAction;
 
 // UI Options
 
   /// Screen's background color. If this parameter is not null, [background] must be null.
   final Color backgroundColor;
 
-   bool showLoginErrorMessage; 
-   bool showPasswordErrorMessage; 
+  //  bool showLoginErrorMessage;
+  //  bool showPasswordErrorMessage;
+  bool showErrortext;
 
   /// Card's color. If null, the theme's default will be used.
   final Color cardColor;
@@ -155,7 +158,61 @@ class _LoginscreenktState extends State<Loginscreenkt> {
 
   bool showAuthenticationErrorMessage = false;
   //bool showPasswordErrorMessage = false;
- // bool showLoginErrorMessage = false;
+  // bool showLoginErrorMessage = false;
+
+  String loginMessage = '';
+  String passwordMessage = '';
+  bool loginErrormessge = false;
+  bool passwordErrormessge = false;
+  bool validateEmail(String value) {
+    bool emailValid = false;
+    String message = '';
+    if (value == '' || value == null) {
+      emailValid = false;
+    } else {
+      emailValid =
+          RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value);
+    }
+    if (value == '' || value == null) {
+      message = 'Please enter email';
+    } else if (!emailValid) {
+      message = 'Please enter a valid email';
+    } else {
+      message = '';
+    }
+
+    setState(() {
+      loginMessage = message;
+      loginErrormessge = !emailValid;
+    });
+    return emailValid;
+  }
+
+  bool validatePassword(String value) {
+    bool passwordvalid = false;
+    String message = '';
+    if (value == '' || value == null) {
+      passwordvalid = false;
+    } else {
+      Pattern pattern =
+          r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@^%#\$&*~(){}<>?:;.,\W_=+-]).{8,}$';
+      RegExp regex = new RegExp(pattern);
+      passwordvalid = regex.hasMatch(value);
+    }
+    if (value == '' || value == null) {
+      message = 'Please enter password';
+    } else if (!passwordvalid) {
+      message =
+          'Password must have at least one capital letter,number and special character';
+    } else {
+      message = '';
+    }
+    setState(() {
+      passwordMessage = message;
+      passwordErrormessge = !passwordvalid;
+    });
+    return passwordvalid;
+  }
 
   @override
   void initState() {
@@ -171,7 +228,7 @@ class _LoginscreenktState extends State<Loginscreenkt> {
   Widget build(BuildContext context) {
     showAuthenticationErrorMessage = false;
     //showPasswordErrorMessage = false;
-   // widget.showLoginErrorMessage = false;
+    // widget.showLoginErrorMessage = false;
 
     return Scaffold(
       backgroundColor: widget.backgroundColor,
@@ -214,62 +271,69 @@ class _LoginscreenktState extends State<Loginscreenkt> {
                                 ),
                               )
                             : Container(),
-                      //   const SizedBox(height: 20),
-                      //  (widget.showLoginErrorMessage)
-                      //  ? IndividualErrorContainer(errorMsg:widget.showLoginErrorMessage ?  (widget.loginErrorMessage ?? "") : (widget.passwordErrorMessage ?? ""))
-                      //  : SizedBox(height: 0),
+                        const SizedBox(height: 20),
+                        widget.showErrortext
+                            ? SizedBox(height: 0)
+                            : (loginErrormessge || passwordErrormessge)
+                                ? IndividualErrorContainer(
+                                    errorMsg: loginErrormessge
+                                        ? (loginMessage ?? "")
+                                        : (passwordMessage ?? ""),
+                                    color: widget.backgroundColor)
+                                : SizedBox(height: 0),
                         const SizedBox(height: 20),
                         TextField(
-                          keyboardType: widget.loginKeyboard,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.person),
-                            hintText: widget.loginHintText,
-                            labelText: widget.loginLabelText ?? 'Login',
-                            errorText: widget.showLoginErrorMessage
-                                ? widget.loginErrorMessage ?? ""
-                                : null,
-                                 errorMaxLines: 10,
-                          ),
-                          onChanged: (value) 
-                          {
-                           setState(() {
-                             login = value;
-                           });
-                           widget.loginValidator(value);
-                          }
-                        ),
+                            keyboardType: widget.loginKeyboard,
+                            decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.person),
+                              hintText: widget.loginHintText,
+                              labelText: widget.loginLabelText ?? 'Login',
+                              errorText: widget.showErrortext
+                                  ? (loginErrormessge
+                                      ? loginMessage ?? ""
+                                      : null)
+                                  : null,
+                              errorMaxLines: 10,
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                login = value;
+                              });
+                              validateEmail(value);
+                            }),
                         const SizedBox(height: 12.0),
                         TextField(
-                          keyboardType: widget.passwordKeyboard,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.lock_outline),
-                            hintText: widget.passwordHintText,
-                            labelText: widget.passwordLabelText ?? 'Password',
-                            errorText: widget.showPasswordErrorMessage
-                                ? widget.passwordErrorMessage ?? ""
-                                : null,
-                                errorMaxLines: 10,
-                            suffix: widget.passwordVisibilityToggable
-                                ? IconButton(
-                                    icon: Icon(obscure
-                                        ? Icons.visibility
-                                        : Icons.visibility_off),
-                                    onPressed: () =>
-                                        setState(() => obscure = !obscure),
-                                  )
-                                : null,
-                          ),
-                          obscureText: widget.passwordVisibilityToggable
-                              ? obscure
-                              : true,
-                          onChanged: (value) 
-                          {
-                            setState(() {
-                              password = value;
-                            });
-                              widget.passwordValidator(value);
-                          }
-                        ),
+                            keyboardType: widget.passwordKeyboard,
+                            decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.lock_outline),
+                              hintText: widget.passwordHintText,
+                              labelText: widget.passwordLabelText ?? 'Password',
+                              errorText: widget.showErrortext
+                                  ? (passwordErrormessge
+                                      ? passwordMessage ?? ""
+                                      : null)
+                                  : null,
+                              errorMaxLines: 10,
+                              suffix: widget.passwordVisibilityToggable
+                                  ? IconButton(
+                                      icon: Icon(obscure
+                                          ? Icons.visibility
+                                          : Icons.visibility_off),
+                                      onPressed: () =>
+                                          setState(() => obscure = !obscure),
+                                    )
+                                  : null,
+                            ),
+                            obscureText: widget.passwordVisibilityToggable
+                                ? obscure
+                                : true,
+                            onChanged: (value) {
+                              setState(() {
+                                password = value;
+                              });
+                              validatePassword(value);
+                              // widget.passwordValidator(value);
+                            }),
                         const SizedBox(height: 4.0),
                         widget.rememberOption
                             ? ListTile(
@@ -315,44 +379,76 @@ class _LoginscreenktState extends State<Loginscreenkt> {
       ),
     );
   }
-  bool validateEmail(String value) {
-    String emaiR = value != null
-        ? value
-        : r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
-    bool emailValid = RegExp(emaiR).hasMatch(value);
-   
-      return emailValid;
-    
-  }
-   bool validatePassword(String value) {
-    String passwordR = value != null
-        ? value
-        : r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
-    RegExp regex = new RegExp(passwordR);
-  
-        return regex.hasMatch(value);
-      // return '';
-    }
 
   void tryLogin() async {
     var result = false;
 
-  //  if (widget.loginValidator(login)) {
-  //     if (widget.passwordValidator(password)) {
-         result = await widget.authenticator(login, password);
+    if (validateEmail(login) && validatePassword(password)) {
+      result = await widget.authenticator(login, password);
 
-  //       if (result) {
-  //         if (widget.rememberOption ?? false) {
-  //           await widget.onRemember(remember);
-  //         }
+      if (result) {
+        if (widget.rememberOption ?? false) {
+          await widget.onRemember(remember);
+        }
 
-  //         Navigator.of(context).pushReplacementNamed(widget.nextRoute);
-  //       } else
-  //         setState(() => showAuthenticationErrorMessage = true);
-  //     } else {
-  //       setState(() => showPasswordErrorMessage = true);
-  //     }
-     // setState(() => widget.showLoginErrorMessage = true);
-   // }
+       // Navigator.of(context).pushReplacementNamed(widget.nextRoute);
+      }
+    }
+  }
+}
+
+class IndividualErrorContainer extends StatelessWidget {
+  final String errorMsg;
+  final Color color;
+
+  IndividualErrorContainer({
+    this.errorMsg,
+    this.color,
+  });
+  @override
+  Widget build(BuildContext context) {
+    // final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return errorPopup(context);
+  }
+
+  Widget errorPopup(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: ConstrainedBox(
+        constraints: new BoxConstraints(
+          minWidth: 10.0,
+
+          //maxWidth: MediaQuery.of(context).size.width,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+          child: Container(
+            alignment: Alignment.bottomLeft,
+            decoration: new BoxDecoration(
+                color: color, borderRadius: new BorderRadius.circular(15)),
+            child: ConstrainedBox(
+              constraints: new BoxConstraints(
+                minWidth: 20,
+                maxWidth: MediaQuery.of(context).size.width,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 15, top: 5, bottom: 5, right: 15),
+                child: Text(
+                  errorMsg,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    //fontFamily: Util.CustomFont
+                  ),
+                  maxLines: 10,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
